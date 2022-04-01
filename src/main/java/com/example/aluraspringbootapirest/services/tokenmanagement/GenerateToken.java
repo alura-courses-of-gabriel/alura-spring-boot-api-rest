@@ -1,16 +1,16 @@
-package com.example.aluraspringbootapirest.controller;
+package com.example.aluraspringbootapirest.services.tokenmanagement;
 
 import com.example.aluraspringbootapirest.modelo.Usuario;
+import com.example.aluraspringbootapirest.services.Service;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
-@Service
-public class TokenService {
+@org.springframework.stereotype.Service
+public class GenerateToken implements Service {
 
     @Value("${forum.jwt.expiration}")
     private String expiration;
@@ -18,9 +18,9 @@ public class TokenService {
     @Value("${forum.jwt.secret}")
     private String secret;
 
-
-    public String gerarToken(Authentication authenticationManager) {
-
+    @Override
+    public Object execute(Object object) {
+        Authentication authenticationManager = (Authentication) object;
         Usuario usuario = (Usuario) authenticationManager.getPrincipal();
         Date date = new Date();
         Date dataExpiracao = new Date(date.getTime() + Long.parseLong(expiration));

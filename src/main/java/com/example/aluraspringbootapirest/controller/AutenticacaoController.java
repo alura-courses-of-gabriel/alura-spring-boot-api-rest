@@ -1,10 +1,12 @@
 package com.example.aluraspringbootapirest.controller;
 
+import com.example.aluraspringbootapirest.services.authenticate.AuthenticateOutput;
+import com.example.aluraspringbootapirest.services.authenticate.Authenticate;
+import com.example.aluraspringbootapirest.services.authenticate.AuthenticateInput;
+import com.example.aluraspringbootapirest.services.tokenmanagement.GenerateToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,15 +23,16 @@ public class AutenticacaoController {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private TokenService tokenService;
+    private GenerateToken generateToken;
+
+    @Autowired
+    private Authenticate authenticate;
 
     @PostMapping
-    public ResponseEntity<AutenticarOutput> autenticar(@RequestBody @Valid LoginData data) {
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(data.username(), data.password());
+    public ResponseEntity<AuthenticateOutput> autenticar(@RequestBody @Valid AuthenticateInput data) {
         try {
-            Authentication autenticador = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-            String token = tokenService.gerarToken(autenticador);
-            return ResponseEntity.ok(new AutenticarOutput(token));
+            AuthenticateOutput output = (AuthenticateOutput) this.authenticate.execute(data);
+            return ResponseEntity.ok(output);
         } catch (AuthenticationException e) {
             return ResponseEntity.badRequest().build();
         }

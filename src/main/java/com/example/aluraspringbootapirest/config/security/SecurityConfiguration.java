@@ -18,12 +18,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private AutenticacaoService autenticacaoService;
+    private LoginService loginService;
 
     //configuracoes de autenticacao, login, etc
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(this.autenticacaoService).passwordEncoder(new BCryptPasswordEncoder());
+        auth.userDetailsService(this.loginService).passwordEncoder(new BCryptPasswordEncoder());
     }
 
     //Configuracoes de autorização, qual perfil de usuario pode acessar qual endpoint.
