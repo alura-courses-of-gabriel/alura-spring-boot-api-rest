@@ -4,8 +4,9 @@ import com.example.aluraspringbootapirest.modelo.Topico;
 import com.example.aluraspringbootapirest.repository.TopicoRepository;
 import com.example.aluraspringbootapirest.services.Service;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @org.springframework.stereotype.Service
 public class FindAll implements Service {
@@ -14,19 +15,25 @@ public class FindAll implements Service {
     private TopicoRepository topicoRepository;
 
     @Override
-    public List<FindAllOutput> execute(Object object) {
-        String nome = (String) object;
+    public Page<FindAllOutput> execute(Object object) {
+        FindAllInput input = (FindAllInput) object;
 
-        List<Topico> topicos = getTopicos(nome);
+        Pageable pageable = PageRequest.of(input.page(), input.itemsPerPage());
 
-        return topicos.stream().map(FindAllOutput::new).toList();
+        Page<Topico> page = getTopicosPagead(input, pageable);
+
+        return page.map(FindAllOutput::new);
     }
 
-    private List<Topico> getTopicos(String nome) {
-        List<Topico> topicos;
+    private Page<Topico> getTopicosPagead(FindAllInput input, Pageable pageable) {
+        Page<Topico> page;
 
-        if (nome == null) topicos = topicoRepository.findAll();
-        else topicos = topicoRepository.findAllByCursoNome(nome);
-        return topicos;
+        if (input.nomeDoCurso() == null) {
+            page = topicoRepository.findAll(pageable);
+        }
+        else {
+            page = topicoRepository.findAllByCursoNome(input.nomeDoCurso(), pageable);
+        }
+        return page;
     }
 }

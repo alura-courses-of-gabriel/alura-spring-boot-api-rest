@@ -13,4 +13,5 @@ public record FindAllOutput(Long id, String titulo, String mensagem, String nome
         this.mensagem = mensagem;
         this.nomeDoCurso = nomeDoCurso;
     }
+
 }

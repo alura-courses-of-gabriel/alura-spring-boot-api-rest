@@ -4,6 +4,7 @@ import com.example.aluraspringbootapirest.services.topico.delete.Delete;
 import com.example.aluraspringbootapirest.services.topico.find.FindOne;
 import com.example.aluraspringbootapirest.services.topico.find.FindOneOutput;
 import com.example.aluraspringbootapirest.services.topico.findall.FindAll;
+import com.example.aluraspringbootapirest.services.topico.findall.FindAllInput;
 import com.example.aluraspringbootapirest.services.topico.findall.FindAllOutput;
 import com.example.aluraspringbootapirest.services.topico.insert.Insert;
 import com.example.aluraspringbootapirest.services.topico.insert.InsertInput;
@@ -12,12 +13,12 @@ import com.example.aluraspringbootapirest.services.topico.update.Update;
 import com.example.aluraspringbootapirest.services.topico.update.UpdateInput;
 import com.example.aluraspringbootapirest.services.topico.update.UpdateOutput;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/topicos")
@@ -39,8 +40,15 @@ public class TopicosController {
     private Delete delete;
 
     @GetMapping
-    public ResponseEntity<List<FindAllOutput>> findAll(String nome) {
-        return ResponseEntity.ok(this.findAll.execute(nome));
+    public ResponseEntity<Page<FindAllOutput>> findAll(
+            @RequestParam(required = false) String nomeDoCurso,
+            @RequestParam Integer page,
+            @RequestParam Integer itemsPerPage
+    ) {
+
+        FindAllInput input = new FindAllInput(nomeDoCurso, page, itemsPerPage);
+
+        return ResponseEntity.ok(this.findAll.execute(input));
     }
 
     @PostMapping
