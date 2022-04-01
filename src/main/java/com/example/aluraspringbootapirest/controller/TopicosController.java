@@ -13,7 +13,12 @@ import com.example.aluraspringbootapirest.services.topico.update.Update;
 import com.example.aluraspringbootapirest.services.topico.update.UpdateInput;
 import com.example.aluraspringbootapirest.services.topico.update.UpdateOutput;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -40,25 +45,27 @@ public class TopicosController {
     private Delete delete;
 
     @GetMapping
+    @Cacheable(value = "findAllTopicos")
     public ResponseEntity<Page<FindAllOutput>> findAll(
             @RequestParam(required = false) String nomeDoCurso,
-            @RequestParam Integer page,
-            @RequestParam Integer itemsPerPage
+            @PageableDefault(sort = "id", page = 0, size = 30, direction = Sort.Direction.ASC) Pageable pageable
     ) {
 
-        FindAllInput input = new FindAllInput(nomeDoCurso, page, itemsPerPage);
+        FindAllInput input = new FindAllInput(nomeDoCurso, pageable);
 
         return ResponseEntity.ok(this.findAll.execute(input));
     }
 
     @PostMapping
+    @CacheEvict(value = "findAllTopicos", allEntries = true)
     public ResponseEntity<InsertOutput> insert(@RequestBody @Valid InsertInput insertInput, UriComponentsBuilder uriComponentsBuilder) {
         InsertOutput output = this.insert.execute(insertInput);
         return ResponseEntity.created(uriComponentsBuilder.path("/topicos/{topico.id}").buildAndExpand(output.id()).toUri()).body(output);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FindOneOutput> getTopico(@PathVariable Long id) {
+    @Cacheable(value = "findOneTopico")
+    public ResponseEntity<FindOneOutput> findOne(@PathVariable Long id) {
         return ResponseEntity.ok(this.findOne.execute(id));
     }
 

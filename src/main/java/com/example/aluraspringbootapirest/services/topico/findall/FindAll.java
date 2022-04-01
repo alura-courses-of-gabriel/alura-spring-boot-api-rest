@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @org.springframework.stereotype.Service
 public class FindAll implements Service {
@@ -18,22 +19,22 @@ public class FindAll implements Service {
     public Page<FindAllOutput> execute(Object object) {
         FindAllInput input = (FindAllInput) object;
 
-        Pageable pageable = PageRequest.of(input.page(), input.itemsPerPage());
-
-        Page<Topico> page = getTopicosPagead(input, pageable);
+        Page<Topico> page = getTopicosPagead(input);
 
         return page.map(FindAllOutput::new);
     }
 
-    private Page<Topico> getTopicosPagead(FindAllInput input, Pageable pageable) {
+    private Page<Topico> getTopicosPagead(FindAllInput input) {
         Page<Topico> page;
 
         if (input.nomeDoCurso() == null) {
-            page = topicoRepository.findAll(pageable);
+            page = topicoRepository.findAll(input.pageable());
         }
         else {
-            page = topicoRepository.findAllByCursoNome(input.nomeDoCurso(), pageable);
+            page = topicoRepository.findAllByCursoNome(input.nomeDoCurso(), input.pageable());
         }
         return page;
     }
 }
+
+//pesquisar sobre varargs e ver se vale a pena aplicar aqui
