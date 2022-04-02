@@ -1,12 +1,13 @@
 package com.example.aluraspringbootapirest.controller;
 
-import com.example.aluraspringbootapirest.services.authenticate.AuthenticateOutput;
-import com.example.aluraspringbootapirest.services.authenticate.Authenticate;
-import com.example.aluraspringbootapirest.services.authenticate.AuthenticateInput;
-import com.example.aluraspringbootapirest.services.tokenmanagement.GenerateToken;
+
+import com.example.aluraspringbootapirest.config.security.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,24 +19,24 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/auth")
 public class AutenticacaoController {
+	
+	@Autowired
+	private AuthenticationManager authManager;
+	
+	@Autowired
+	private TokenService tokenService;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private GenerateToken generateToken;
-
-    @Autowired
-    private Authenticate authenticate;
-
-    @PostMapping
-    public ResponseEntity<AuthenticateOutput> autenticar(@RequestBody @Valid AuthenticateInput data) {
-        try {
-            AuthenticateOutput output = (AuthenticateOutput) this.authenticate.execute(data);
-            return ResponseEntity.ok(output);
-        } catch (AuthenticationException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
+	@PostMapping
+	public ResponseEntity<TokenDto> autenticar(@RequestBody @Valid LoginForm form) {
+		UsernamePasswordAuthenticationToken dadosLogin = form.converter();
+		
+		try {
+			Authentication authentication = authManager.authenticate(dadosLogin);
+			String token = tokenService.gerarToken(authentication);
+			return ResponseEntity.ok(new TokenDto(token, "Bearer"));
+		} catch (AuthenticationException e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+	
 }
